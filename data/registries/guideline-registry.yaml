@@ -1,0 +1,140 @@
+# Wikimedica Guideline Registry
+# =============================================================================
+# Format: YAML list of tracked clinical guidelines
+# Maintained by: AT Medical Digital Solutions — Editorial Board
+# Last updated: 2025-01-01
+#
+# Field descriptions:
+#   id:             Unique identifier (format: issuer-register-or-slug)
+#   title:          Full guideline title (German or English)
+#   specialty:      Wikimedica canonical specialty name
+#   issuer:         Issuing organisation
+#   year:           Year of current version
+#   url:            Direct URL to guideline or registry entry
+#   next_review:    Expected next update date (ISO 8601)
+#   priority:       high | medium | low
+#   status:         current | under-revision | superseded | withdrawn
+#   wikimedica_articles: list of Wikimedica article filenames referencing this guideline
+# =============================================================================
+
+guidelines:
+
+  - id: "awmf-019-001"
+    title: "Nationale VersorgungsLeitlinie (NVL) Chronische Herzinsuffizienz"
+    specialty: "Kardiologie"
+    issuer: "AWMF / DGK / DEGAM / DGIM"
+    year: 2023
+    version: "4.0"
+    url: "https://www.awmf.org/leitlinien/detail/ll/019-001.html"
+    next_review: "2026-01-01"
+    priority: high
+    status: current
+    wikimedica_articles: []
+
+  - id: "esc-2023-hf"
+    title: "2023 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure"
+    specialty: "Kardiologie"
+    issuer: "ESC / DGK"
+    year: 2023
+    version: "2023"
+    url: "https://www.escardio.org/Guidelines/Clinical-Practice-Guidelines/Acute-and-Chronic-Heart-Failure"
+    next_review: "2027-01-01"
+    priority: high
+    status: current
+    wikimedica_articles: []
+
+  - id: "awmf-nvl-copd"
+    title: "Nationale VersorgungsLeitlinie COPD"
+    specialty: "Pneumologie"
+    issuer: "AWMF / DGP / DEGAM"
+    year: 2021
+    version: "2.0"
+    url: "https://www.awmf.org/leitlinien/detail/ll/nvl-003.html"
+    next_review: "2026-06-01"
+    priority: high
+    status: current
+    wikimedica_articles: []
+
+  - id: "awmf-053-002"
+    title: "S3-Leitlinie Typ-2-Diabetes: Therapie"
+    specialty: "Endokrinologie/Diabetologie"
+    issuer: "AWMF / DDG / DGIM"
+    year: 2023
+    version: "3.0"
+    url: "https://www.awmf.org/leitlinien/detail/ll/057-014.html"
+    next_review: "2026-01-01"
+    priority: high
+    status: current
+    wikimedica_articles: []
+
+  - id: "awmf-nvl-depression"
+    title: "S3-Leitlinie / NVL Unipolare Depression"
+    specialty: "Psychiatrie"
+    issuer: "AWMF / DGPPN / DGPM / DEGAM"
+    year: 2022
+    version: "3.1"
+    url: "https://www.awmf.org/leitlinien/detail/ll/nvl-005.html"
+    next_review: "2026-12-01"
+    priority: high
+    status: current
+    wikimedica_articles: []
+
+  - id: "esc-2023-acs"
+    title: "2023 ESC Guidelines for the management of acute coronary syndromes"
+    specialty: "Kardiologie"
+    issuer: "ESC / DGK"
+    year: 2023
+    version: "2023"
+    url: "https://www.escardio.org/Guidelines/Clinical-Practice-Guidelines/Acute-Coronary-Syndromes"
+    next_review: "2027-01-01"
+    priority: high
+    status: current
+    wikimedica_articles: []
+
+  - id: "awmf-079-001"
+    title: "S3-Leitlinie Sepsis – Prävention, Diagnose, Therapie und Nachsorge"
+    specialty: "Infektiologie"
+    issuer: "AWMF / DGAI / DGIIN / DGI / DIVI"
+    year: 2020
+    version: "1.0"
+    url: "https://www.awmf.org/leitlinien/detail/ll/079-001.html"
+    next_review: "2026-07-01"
+    priority: high
+    status: under-revision
+    wikimedica_articles: []
+
+  - id: "awmf-030-073"
+    title: "S3-Leitlinie Mammakarzinom"
+    specialty: "Hämatologie/Onkologie"
+    issuer: "AWMF / DGHO / DGS / AGO"
+    year: 2021
+    version: "4.4"
+    url: "https://www.awmf.org/leitlinien/detail/ll/032-045.html"
+    next_review: "2026-04-01"
+    priority: high
+    status: current
+    wikimedica_articles: []
+
+  - id: "awmf-nvl-stroke"
+    title: "S3-Leitlinie Schlaganfall"
+    specialty: "Neurologie"
+    issuer: "AWMF / DGN / DSG"
+    year: 2022
+    version: "1.0"
+    url: "https://www.awmf.org/leitlinien/detail/ll/nvl-008.html"
+    next_review: "2026-09-01"
+    priority: high
+    status: current
+    wikimedica_articles: []
+
+  - id: "erc-2021-resuscitation"
+    title: "European Resuscitation Council Guidelines 2021"
+    specialty: "Notfallmedizin"
+    issuer: "ERC / GRC"
+    year: 2021
+    version: "2021"
+    url: "https://www.erc.edu/guidelines"
+    next_review: "2026-01-01"
+    priority: high
+    status: current
+    wikimedica_articles: []

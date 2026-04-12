@@ -1,0 +1,77 @@
+name: Article Update Request
+description: Request an update to an existing Wikimedica article
+title: "[Update] "
+labels:
+  - article-update
+  - triage
+
+body:
+  - type: input
+    id: article-link
+    attributes:
+      label: Link to Existing Article
+      description: >
+        Provide the GitHub path or MediaWiki URL of the article to be updated.
+      placeholder: "content/specialties/kardiologie/herzinsuffizienz.md"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: update-reason
+    attributes:
+      label: Reason for Update
+      description: What triggered this update request?
+      options:
+        - New / updated clinical guideline (AWMF / ESC / NICE / other)
+        - New PubMed publication changes evidence base
+        - Factual error identified
+        - Patient safety concern
+        - Content is outdated (stale)
+        - ICD-10 / coding update
+        - Missing important information
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: update-description
+    attributes:
+      label: Description of Required Changes
+      description: >
+        Describe specifically what needs to be changed and why.
+        Be as precise as possible about which sections are affected.
+    validations:
+      required: true
+
+  - type: textarea
+    id: new-sources
+    attributes:
+      label: New Sources Supporting the Update
+      description: >
+        List the guidelines or publications that support the proposed changes.
+      placeholder: |
+        - PMID: 38000001 (title: ...)
+        - ESC 2023 Guidelines update (https://...)
+        - AWMF Leitlinie Rev. 2024 (Nr. ...)
+    validations:
+      required: false
+
+  - type: dropdown
+    id: urgency
+    attributes:
+      label: Urgency
+      options:
+        - Emergency (patient safety — needs action within 24-48h)
+        - Urgent (significant clinical impact — within 7 days)
+        - Standard (within 30 days)
+        - Low (next quarterly review cycle)
+    validations:
+      required: true
+
+  - type: input
+    id: specialty
+    attributes:
+      label: Specialty
+      placeholder: "e.g. Kardiologie"
+    validations:
+      required: true

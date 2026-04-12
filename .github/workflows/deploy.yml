@@ -1,0 +1,77 @@
+name: Deploy to Production
+
+on:
+  push:
+    tags:
+      - "v*.*.*"  # Trigger on version tags: v1.0.0, v2.1.3, etc.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag or commit to deploy"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    environment: production  # Requires environment protection rules in GitHub
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Determine deploy target
+        id: target
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "ref=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "ref=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Run deploy script on VPS
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          DEPLOY_REF: ${{ steps.target.outputs.ref }}
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=yes \
+            "${VPS_USER}@${VPS_HOST}" \
+            "cd /opt/wikimedica && ./infra/deploy/deploy.sh ${DEPLOY_REF}"
+
+      - name: Clean up SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "✅ Deployment of ${{ steps.target.outputs.ref }} completed successfully."
+
+      - name: Create deployment record
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: context.payload.deployment?.id || 0,
+              state: 'success',
+              description: `Deployed ${{ steps.target.outputs.ref }} to production`,
+              environment_url: 'https://wikimedica.de',
+            }).catch(() => {
+              // Deployment status creation is best-effort
+              core.info('Could not create deployment status (no deployment object).');
+            });

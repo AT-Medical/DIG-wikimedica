@@ -48,8 +48,16 @@ jobs:
               ],
             };
 
-            // Specialty label is required only for content PRs
-            const isContentPR = labels.some(l => l.startsWith('content-type:'));
+            // Specialty label is required only for actual content PRs.
+            // Do not apply this requirement to operational PR types such as
+            // infrastructure, governance, documentation, or automation.
+            const specialtyRequiredContentTypes = [
+              'content-type:new-article',
+              'content-type:article-update',
+              'content-type:consent-module',
+              'content-type:discharge-module',
+            ];
+            const isContentPR = labels.some(l => specialtyRequiredContentTypes.includes(l));
             if (isContentPR) {
               requiredCategories['specialty'] = [
                 // At least one label starting with 'specialty:' must be present

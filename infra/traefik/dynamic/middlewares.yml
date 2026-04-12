@@ -1,0 +1,101 @@
+# =============================================================================
+# Traefik Dynamic Configuration — Middlewares
+# =============================================================================
+# File: infra/traefik/dynamic/middlewares.yml
+# Loaded automatically by Traefik's file provider.
+# =============================================================================
+
+http:
+  middlewares:
+
+    # -------------------------------------------------------------------------
+    # redirect-to-https
+    # Permanently redirects all HTTP traffic to HTTPS.
+    # Applied to all HTTP (port 80) routers.
+    # -------------------------------------------------------------------------
+    redirect-to-https:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+    # -------------------------------------------------------------------------
+    # security-headers
+    # Adds comprehensive security headers to all HTTPS responses.
+    # Applied to the MediaWiki router.
+    # -------------------------------------------------------------------------
+    security-headers:
+      headers:
+        # Prevent the site from being embedded in iframes (clickjacking protection)
+        frameDeny: true
+        customFrameOptionsValue: "SAMEORIGIN"
+
+        # Prevent browsers from MIME-sniffing the content type
+        contentTypeNosniff: true
+
+        # Enable browser XSS protection (legacy browsers)
+        browserXssFilter: true
+
+        # HTTP Strict Transport Security — force HTTPS for 1 year
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        stsPreload: true
+        forceSTSHeader: true
+
+        # Referrer policy — send full URL within same origin, only origin cross-origin
+        referrerPolicy: "strict-origin-when-cross-origin"
+
+        # Permissions policy — restrict access to browser features
+        permissionsPolicy: "camera=(), microphone=(), geolocation=(), payment=()"
+
+        # Content Security Policy
+        # Adjust for MediaWiki extensions that load external resources.
+        # Start restrictive and relax as needed.
+        contentSecurityPolicy: >-
+          default-src 'self';
+          script-src 'self' 'unsafe-inline' 'unsafe-eval';
+          style-src 'self' 'unsafe-inline';
+          img-src 'self' data: https://upload.wikimedia.org;
+          font-src 'self';
+          connect-src 'self';
+          media-src 'self';
+          object-src 'none';
+          frame-ancestors 'self';
+          base-uri 'self';
+          form-action 'self';
+
+        # Remove server identification headers
+        customResponseHeaders:
+          X-Powered-By: ""
+          Server: ""
+
+    # -------------------------------------------------------------------------
+    # rate-limit
+    # Limits requests to protect against abuse and DDoS.
+    # Values are per source IP.
+    # -------------------------------------------------------------------------
+    rate-limit:
+      rateLimit:
+        average: 50       # Average requests per second per IP
+        burst: 100        # Maximum burst
+
+    # -------------------------------------------------------------------------
+    # compress
+    # Enable Gzip compression for responses.
+    # -------------------------------------------------------------------------
+    compress:
+      compress:
+        excludedContentTypes:
+          - text/event-stream
+
+    # -------------------------------------------------------------------------
+    # chain-secure
+    # Combines redirect-to-https + security-headers + rate-limit + compress
+    # for use as a single middleware chain on secured routers.
+    # -------------------------------------------------------------------------
+    chain-secure:
+      chain:
+        middlewares:
+          - redirect-to-https
+          - security-headers
+          - rate-limit
+          - compress

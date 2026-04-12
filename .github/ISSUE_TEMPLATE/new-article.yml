@@ -1,0 +1,113 @@
+name: New Article Request
+description: Request the creation of a new Wikimedica article
+title: "[New Article] "
+labels:
+  - new-article
+  - triage
+
+body:
+  - type: input
+    id: article-title
+    attributes:
+      label: Proposed Article Title
+      description: What should the article be called? (German title preferred)
+      placeholder: "z.B. Herzinsuffizienz — Akutmanagement"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: specialty
+    attributes:
+      label: Specialty
+      description: Which Wikimedica specialty does this article belong to?
+      options:
+        - Innere Medizin
+        - Kardiologie
+        - Pneumologie
+        - Gastroenterologie
+        - Nephrologie
+        - Endokrinologie/Diabetologie
+        - Hämatologie/Onkologie
+        - Infektiologie
+        - Rheumatologie
+        - Neurologie
+        - Psychiatrie
+        - Dermatologie
+        - Pädiatrie
+        - Gynäkologie/Geburtshilfe
+        - Urologie
+        - Orthopädie/Unfallchirurgie
+        - Anästhesiologie
+        - Intensivmedizin
+        - Notfallmedizin
+        - Chirurgie
+        - Radiologie
+        - Labormedizin
+        - Pharmakologie
+        - Palliativmedizin
+        - Prävention/Public Health
+        - Gender-Medizin
+    validations:
+      required: true
+
+  - type: dropdown
+    id: article-type
+    attributes:
+      label: Article Type
+      options:
+        - Professional (Fachärztlicher Artikel)
+        - Patient (Patientenartikel)
+        - Consent Module (Aufklärungsbogen)
+        - Discharge Module (Entlassinformation)
+        - Pharmaka
+        - Therapy Protocol
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description / Clinical Rationale
+      description: >
+        Why is this article needed? What clinical question does it address?
+        What gaps in the current Wikimedica content does it fill?
+      placeholder: "Dieses Thema ist klinisch relevant weil..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: sources
+    attributes:
+      label: Key Sources / Guidelines
+      description: >
+        List any key guidelines (AWMF, ESC, etc.) or pivotal publications
+        (PMIDs) that should inform this article.
+      placeholder: |
+        - ESC Guidelines for HF 2023 (https://...)
+        - PMID: 12345678
+        - AWMF Leitlinie Nr. 019-001
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - High (patient safety / recent guideline change)
+        - Medium (clinically important, no urgent trigger)
+        - Low (supplementary content)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have searched for existing articles on this topic
+          required: true
+        - label: I have confirmed this is not already in progress
+          required: true
+        - label: I am willing to author or co-author this article
+          required: false

@@ -1,0 +1,71 @@
+# CODEOWNERS — Wikimedica
+# =============================================================================
+# Defines required reviewers for changes to specific directories and files.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Format: pattern  owner(s)
+# Owners can be GitHub usernames (@user), teams (@org/team), or email addresses.
+# The last matching rule takes precedence.
+# =============================================================================
+
+# Default owner for everything not matched below
+*                               @atmedical-wikimedica/editors
+
+# ---------------------------------------------------------------------------
+# Editorial governance and policies
+# Documents in docs/ require approval from the editorial team
+# ---------------------------------------------------------------------------
+docs/                           @atmedical-wikimedica/editorial-board
+docs/legal/                     @atmedical-wikimedica/editorial-board @atmedical-wikimedica/legal
+docs/architecture/              @atmedical-wikimedica/devops @atmedical-wikimedica/editorial-board
+
+# ---------------------------------------------------------------------------
+# Medical content
+# All content articles require approval from a medical editor
+# Specialty subdirectories can be assigned to specialty editors when known
+# ---------------------------------------------------------------------------
+content/                        @atmedical-wikimedica/medical-editors
+content/specialties/            @atmedical-wikimedica/medical-editors
+content/specialties/gender-medizin/  @atmedical-wikimedica/gender-medizin-editors
+content/templates/              @atmedical-wikimedica/editorial-board
+content/consent-modules/        @atmedical-wikimedica/medical-editors
+content/discharge-modules/      @atmedical-wikimedica/medical-editors
+
+# ---------------------------------------------------------------------------
+# Infrastructure and DevOps
+# Changes to infra/ require approval from the DevOps team
+# ---------------------------------------------------------------------------
+infra/                          @atmedical-wikimedica/devops
+infra/docker/                   @atmedical-wikimedica/devops
+infra/traefik/                  @atmedical-wikimedica/devops
+infra/deploy/                   @atmedical-wikimedica/devops
+infra/env/.env.example          @atmedical-wikimedica/devops
+
+# ---------------------------------------------------------------------------
+# GitHub Actions workflows
+# CI/CD workflow changes require DevOps approval
+# ---------------------------------------------------------------------------
+.github/workflows/              @atmedical-wikimedica/devops
+.github/CODEOWNERS              @atmedical-wikimedica/devops @atmedical-wikimedica/editorial-board
+
+# ---------------------------------------------------------------------------
+# Automation scripts
+# Script changes require DevOps approval + editorial awareness
+# ---------------------------------------------------------------------------
+scripts/                        @atmedical-wikimedica/devops
+
+# PubMed scripts additionally require editorial review (affect content pipeline)
+scripts/pubmed/                 @atmedical-wikimedica/devops @atmedical-wikimedica/editorial-board
+
+# ---------------------------------------------------------------------------
+# Data registries
+# Guideline registry changes require editorial board approval
+# ---------------------------------------------------------------------------
+data/registries/                @atmedical-wikimedica/editorial-board
+data/metadata/                  @atmedical-wikimedica/devops @atmedical-wikimedica/editorial-board
+
+# ---------------------------------------------------------------------------
+# Forms
+# Author application and review forms require editorial board approval
+# ---------------------------------------------------------------------------
+forms/                          @atmedical-wikimedica/editorial-board

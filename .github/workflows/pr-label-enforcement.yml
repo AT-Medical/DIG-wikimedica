@@ -1,0 +1,117 @@
+name: PR Label Enforcement
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
+
+jobs:
+  check-labels:
+    name: Verify required PR labels are present
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check required labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const labels = pr.labels.map(l => l.name);
+
+            // Define required label categories and their allowed values
+            const requiredCategories = {
+              'content-type': [
+                'content-type:new-article',
+                'content-type:article-update',
+                'content-type:consent-module',
+                'content-type:discharge-module',
+                'content-type:infrastructure',
+                'content-type:governance',
+                'content-type:documentation',
+                'content-type:automation',
+              ],
+              'review-status': [
+                'review-status:draft',
+                'review-status:ready-for-review',
+                'review-status:in-review',
+                'review-status:changes-requested',
+                'review-status:approved',
+              ],
+            };
+
+            // Specialty label is required only for content PRs
+            const isContentPR = labels.some(l => l.startsWith('content-type:'));
+            if (isContentPR) {
+              requiredCategories['specialty'] = [
+                // At least one label starting with 'specialty:' must be present
+                'specialty:kardiologie',
+                'specialty:neurologie',
+                'specialty:gender-medizin',
+                // ... (any specialty: prefix label is valid)
+              ];
+            }
+
+            const missing = [];
+
+            for (const [category, allowedValues] of Object.entries(requiredCategories)) {
+              if (category === 'specialty') {
+                // Special case: any label with 'specialty:' prefix is sufficient
+                if (!labels.some(l => l.startsWith('specialty:'))) {
+                  missing.push(`**${category}** — add a label like \`specialty:kardiologie\``);
+                }
+              } else {
+                const hasLabel = labels.some(l => allowedValues.includes(l));
+                if (!hasLabel) {
+                  missing.push(`**${category}** — one of: ${allowedValues.join(', ')}`);
+                }
+              }
+            }
+
+            if (missing.length > 0) {
+              const body = [
+                '## ⚠️ Required PR Labels Missing',
+                '',
+                'This PR is missing one or more required label categories. Please add the appropriate labels:',
+                '',
+                missing.map(m => `- ${m}`).join('\n'),
+                '',
+                '**How to add labels:** Use the Labels panel on the right sidebar of this PR.',
+                '',
+                '*This check is enforced by the Wikimedica editorial governance policy.*',
+              ].join('\n');
+
+              // Post or update a comment
+              const comments = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+              });
+
+              const botComment = comments.data.find(c =>
+                c.user.type === 'Bot' && c.body.includes('Required PR Labels Missing')
+              );
+
+              if (botComment) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: botComment.id,
+                  body,
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body,
+                });
+              }
+
+              core.setFailed(`Missing required labels: ${missing.join('; ')}`);
+            } else {
+              core.info('All required labels present. ✅');
+            }

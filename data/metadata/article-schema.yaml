@@ -1,0 +1,266 @@
+# Wikimedica Article Metadata Schema
+# =============================================================================
+# YAML schema definition for Wikimedica article frontmatter.
+# Used by scripts/validation/validate-metadata.py for automated validation.
+#
+# Field format:
+#   field_name:
+#     type:        Python type name (str, int, list, bool, dict)
+#     required:    true | false
+#     description: Human-readable description
+#     values:      (optional) list of allowed values for enum fields
+#     default:     (optional) default value if not specified
+# =============================================================================
+
+fields:
+
+  # ---------------------------------------------------------------------------
+  # Core Identity Fields (Required)
+  # ---------------------------------------------------------------------------
+
+  title:
+    type: str
+    required: true
+    description: Full article title in German. Must be non-empty.
+
+  specialty:
+    type: str
+    required: true
+    description: Primary Wikimedica specialty. Must match one of the 26 canonical specialty names.
+    values:
+      - "Innere Medizin"
+      - "Kardiologie"
+      - "Pneumologie"
+      - "Gastroenterologie"
+      - "Nephrologie"
+      - "Endokrinologie/Diabetologie"
+      - "Hämatologie/Onkologie"
+      - "Infektiologie"
+      - "Rheumatologie"
+      - "Neurologie"
+      - "Psychiatrie"
+      - "Dermatologie"
+      - "Pädiatrie"
+      - "Gynäkologie/Geburtshilfe"
+      - "Urologie"
+      - "Orthopädie/Unfallchirurgie"
+      - "Anästhesiologie"
+      - "Intensivmedizin"
+      - "Notfallmedizin"
+      - "Chirurgie"
+      - "Radiologie"
+      - "Labormedizin"
+      - "Pharmakologie"
+      - "Palliativmedizin"
+      - "Prävention/Public Health"
+      - "Gender-Medizin"
+
+  article_type:
+    type: str
+    required: true
+    description: Type of article content.
+    values:
+      - professional
+      - patient
+      - consent
+      - discharge
+      - pharmaka
+      - therapy
+
+  status:
+    type: str
+    required: true
+    description: Current lifecycle status of the article.
+    values:
+      - draft
+      - in-review
+      - advisor-review
+      - approved
+      - published
+      - archived
+      - retracted
+
+  # ---------------------------------------------------------------------------
+  # Versioning
+  # ---------------------------------------------------------------------------
+
+  version:
+    type: str
+    required: true
+    description: Semantic version string (MAJOR.MINOR.PATCH, e.g., "1.0.0").
+
+  # ---------------------------------------------------------------------------
+  # Authorship
+  # ---------------------------------------------------------------------------
+
+  authors:
+    type: list
+    required: true
+    description: List of authors. At least one required. Each entry is a dict with name (required), email, orcid, affiliation.
+    min_length: 1
+
+  reviewers:
+    type: list
+    required: false
+    description: List of reviewers. Each entry is a dict with name, specialty, reviewed_date. Required before status moves past in-review.
+    default: []
+
+  medical_advisor:
+    type: str
+    required: false
+    description: Name of Medical Advisor (required for high-risk articles; enforced by CODEOWNERS).
+
+  # ---------------------------------------------------------------------------
+  # Dates
+  # ---------------------------------------------------------------------------
+
+  created:
+    type: str
+    required: true
+    description: ISO 8601 creation date (YYYY-MM-DD).
+    format: "YYYY-MM-DD"
+
+  updated:
+    type: str
+    required: true
+    description: ISO 8601 date of last update (YYYY-MM-DD). Must be updated on every revision.
+    format: "YYYY-MM-DD"
+
+  next_review:
+    type: str
+    required: false
+    description: ISO 8601 date when article should next be reviewed (YYYY-MM-DD).
+    format: "YYYY-MM-DD"
+
+  # ---------------------------------------------------------------------------
+  # Classification
+  # ---------------------------------------------------------------------------
+
+  secondary_specialties:
+    type: list
+    required: false
+    description: Additional specialty tags for cross-specialty articles. Values must match canonical specialty names.
+    default: []
+
+  icd10:
+    type: list
+    required: false
+    description: List of relevant ICD-10-GM codes (strings, e.g., ["I50.0", "I50.1"]).
+    default: []
+
+  ops:
+    type: list
+    required: false
+    description: List of relevant OPS procedure codes.
+    default: []
+
+  # ---------------------------------------------------------------------------
+  # Evidence
+  # ---------------------------------------------------------------------------
+
+  pubmed_ids:
+    type: list
+    required: false
+    description: List of supporting PubMed IDs (integers or strings).
+    default: []
+
+  guidelines:
+    type: list
+    required: false
+    description: >
+      List of referenced clinical guidelines. Each entry is a dict with:
+      title (required), issuer, awmf_register, year, url.
+    default: []
+
+  # ---------------------------------------------------------------------------
+  # Language and Content Metadata
+  # ---------------------------------------------------------------------------
+
+  language:
+    type: str
+    required: false
+    description: ISO 639-1 language code of the article.
+    default: "de"
+    values:
+      - de
+      - en
+      - fr
+
+  language_level:
+    type: str
+    required: false
+    description: Target reading level for the article.
+    default: professional
+    values:
+      - professional
+      - simplified
+      - layperson
+      - simple
+
+  # ---------------------------------------------------------------------------
+  # Policy and Legal
+  # ---------------------------------------------------------------------------
+
+  ai_assisted:
+    type: bool
+    required: false
+    description: Set to true if AI tools contributed substantially to the initial draft.
+    default: false
+
+  safety_hold:
+    type: bool
+    required: false
+    description: Set to true if article is under patient safety review.
+    default: false
+
+  wikimedica_credit:
+    type: bool
+    required: true
+    description: Must always be true for published Wikimedica content.
+    values:
+      - true
+
+  licence:
+    type: str
+    required: false
+    description: Content licence.
+    default: "CC BY-SA 4.0"
+
+  # ---------------------------------------------------------------------------
+  # Consent / Discharge Module Specific Fields
+  # ---------------------------------------------------------------------------
+
+  procedure:
+    type: str
+    required: false
+    description: Name of the medical procedure (for consent and discharge modules).
+
+  module_type:
+    type: str
+    required: false
+    description: Subtype for modular content.
+    values:
+      - consent
+      - discharge
+
+  clinic_brandable:
+    type: bool
+    required: false
+    description: Whether the module supports clinic-specific branding in header/footer.
+    default: false
+
+  qr_media_url:
+    type: str
+    required: false
+    description: URL to QR-code-linked multimedia explanation (video, animation).
+
+  # ---------------------------------------------------------------------------
+  # Correction History
+  # ---------------------------------------------------------------------------
+
+  corrections:
+    type: list
+    required: false
+    description: >
+      List of post-publication corrections. Each entry: date, description, version_after.
+    default: []

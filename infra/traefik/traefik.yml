@@ -1,0 +1,108 @@
+# =============================================================================
+# Traefik Static Configuration — Wikimedica
+# =============================================================================
+# File: infra/traefik/traefik.yml
+# Mounted read-only into the Traefik container.
+# =============================================================================
+
+# Global settings
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+# ---------------------------------------------------------------------------
+# API & Dashboard
+# ---------------------------------------------------------------------------
+api:
+  dashboard: false      # Disabled in production; enable in local dev only
+  insecure: false       # Never expose API without authentication in production
+
+# ---------------------------------------------------------------------------
+# Ping endpoint (used for health checks)
+# ---------------------------------------------------------------------------
+ping:
+  entryPoint: "web"
+
+# ---------------------------------------------------------------------------
+# Entrypoints
+# ---------------------------------------------------------------------------
+entryPoints:
+  web:
+    address: ":80"
+    # HTTP → HTTPS redirect is handled as a middleware in dynamic config
+    # to allow granular control per router
+
+  websecure:
+    address: ":443"
+    http:
+      tls:
+        certResolver: cloudflare-dns
+        domains:
+          - main: "wikimedica.de"
+            sans:
+              - "www.wikimedica.de"
+              - "*.wikimedica.de"
+
+# ---------------------------------------------------------------------------
+# Certificate Resolvers — Let's Encrypt via Cloudflare DNS-01 Challenge
+# ---------------------------------------------------------------------------
+certificatesResolvers:
+  cloudflare-dns:
+    acme:
+      email: "${TRAEFIK_ACME_EMAIL}"
+      storage: /certs/acme.json
+      caServer: "https://acme-v02.api.letsencrypt.org/directory"
+      dnsChallenge:
+        provider: cloudflare
+        # Cloudflare API token is read from CLOUDFLARE_API_TOKEN env var
+        # (set in Docker Compose env_file)
+        resolvers:
+          - "1.1.1.1:53"
+          - "8.8.8.8:53"
+        delayBeforeCheck: 30
+
+# ---------------------------------------------------------------------------
+# Providers
+# ---------------------------------------------------------------------------
+providers:
+  # Docker provider — reads labels from running containers
+  docker:
+    exposedByDefault: false      # Containers must explicitly enable Traefik
+    network: wikimedica_traefik_net
+    watch: true
+
+  # File provider — reads dynamic configuration from directory
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+
+# ---------------------------------------------------------------------------
+# Logging
+# ---------------------------------------------------------------------------
+log:
+  level: "INFO"           # DEBUG | INFO | WARN | ERROR
+  format: "json"          # json | common
+
+# Access logs — log all requests
+accessLog:
+  format: "json"
+  fields:
+    defaultMode: keep
+    headers:
+      defaultMode: drop
+      names:
+        User-Agent: keep
+        X-Forwarded-For: keep
+        X-Real-IP: keep
+
+# ---------------------------------------------------------------------------
+# Metrics (optional — uncomment to enable Prometheus scraping)
+# ---------------------------------------------------------------------------
+# metrics:
+#   prometheus:
+#     entryPoint: traefik
+#     buckets:
+#       - 0.1
+#       - 0.3
+#       - 1.2
+#       - 5.0

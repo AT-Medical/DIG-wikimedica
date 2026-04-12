@@ -1,0 +1,139 @@
+version: "3.9"
+
+# =============================================================================
+# Wikimedica — Production Docker Compose
+# =============================================================================
+# Usage: docker compose -f infra/docker/docker-compose.yml up -d
+# Requires: infra/env/.env (copy from infra/env/.env.example and fill in values)
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # Traefik — Reverse Proxy & TLS Termination
+  # ---------------------------------------------------------------------------
+  traefik:
+    image: traefik:v3.0
+    container_name: wikimedica_traefik
+    restart: unless-stopped
+    env_file:
+      - ../env/.env
+    command:
+      - "--configFile=/etc/traefik/traefik.yml"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ../traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ../traefik/dynamic:/etc/traefik/dynamic:ro
+      - traefik_certs:/certs
+    networks:
+      - traefik_net
+    labels:
+      - "traefik.enable=false"  # Do not expose the Traefik dashboard publicly
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ---------------------------------------------------------------------------
+  # MediaWiki — Application
+  # ---------------------------------------------------------------------------
+  mediawiki:
+    image: mediawiki:1.42
+    container_name: wikimedica_app
+    restart: unless-stopped
+    env_file:
+      - ../env/.env
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    volumes:
+      - mediawiki_images:/var/www/html/images
+      - ../mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php:ro
+    networks:
+      - traefik_net
+      - internal_net
+    labels:
+      # Enable Traefik routing
+      - "traefik.enable=true"
+      - "traefik.docker.network=wikimedica_traefik_net"
+      # Router: HTTPS
+      - "traefik.http.routers.mediawiki.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.mediawiki.entrypoints=websecure"
+      - "traefik.http.routers.mediawiki.tls=true"
+      - "traefik.http.routers.mediawiki.tls.certresolver=cloudflare-dns"
+      - "traefik.http.routers.mediawiki.middlewares=security-headers@file"
+      # Router: HTTP (redirect to HTTPS)
+      - "traefik.http.routers.mediawiki-http.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.mediawiki-http.entrypoints=web"
+      - "traefik.http.routers.mediawiki-http.middlewares=redirect-to-https@file"
+      # Service
+      - "traefik.http.services.mediawiki.loadbalancer.server.port=80"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api.php?action=query&format=json"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ---------------------------------------------------------------------------
+  # MariaDB — Database
+  # ---------------------------------------------------------------------------
+  mariadb:
+    image: mariadb:10.11
+    container_name: wikimedica_db
+    restart: unless-stopped
+    env_file:
+      - ../env/.env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MEDIAWIKI_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MEDIAWIKI_DB_NAME}
+      MYSQL_USER: ${MEDIAWIKI_DB_USER}
+      MYSQL_PASSWORD: ${MEDIAWIKI_DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - internal_net
+    # MariaDB should NOT be accessible from the traefik_net or the host in production
+    expose:
+      - "3306"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "healthcheck.sh",
+          "--su-mysql",
+          "--connect",
+          "--innodb_initialized",
+        ]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+# ---------------------------------------------------------------------------
+# Named Volumes
+# ---------------------------------------------------------------------------
+volumes:
+  db_data:
+    name: wikimedica_db_data
+  mediawiki_images:
+    name: wikimedica_images
+  traefik_certs:
+    name: wikimedica_certs
+
+# ---------------------------------------------------------------------------
+# Networks
+# ---------------------------------------------------------------------------
+networks:
+  traefik_net:
+    name: wikimedica_traefik_net
+    driver: bridge
+  internal_net:
+    name: wikimedica_internal_net
+    driver: bridge
+    internal: true  # No external access; MariaDB only reachable from within

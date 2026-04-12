@@ -1,0 +1,169 @@
+# Content Lifecycle — Wikimedica
+
+**Document version:** 1.0
+**Owner:** AT Medical Digital Solutions — Editorial Operations
+**Last updated:** 2025-01-01
+
+---
+
+## 1. Overview
+
+This document describes the complete lifecycle of a Wikimedica article — from initial proposal through drafting, review, publication, ongoing maintenance, and eventual archival. It also defines the versioning model, update triggers, content scoring approach, and quality metrics.
+
+---
+
+## 2. Lifecycle Stages
+
+```
+PROPOSAL
+    │  GitHub Issue: new-article template
+    ▼
+TRIAGE
+    │  Editor assigns specialty, priority, author
+    ▼
+DRAFTING
+    │  Author creates PR using content template
+    │  Status: draft
+    ▼
+PEER REVIEW
+    │  Assigned reviewer(s) evaluate content
+    │  Status: in-review
+    │
+    ├──[needs revision]──► DRAFTING (revision cycle)
+    │
+    └──[approved by reviewer]──►
+EDITORIAL REVIEW
+    │  Editor checks compliance, metadata, sourcing
+    │  Status: in-review (editor stage)
+    │
+    ├──[needs revision]──► DRAFTING
+    │
+    └──[editor approved]──►
+MEDICAL ADVISOR REVIEW (high-risk only)
+    │  Advisor sign-off for clinical safety
+    │  Status: advisor-review
+    │
+    └──[advisor approved]──►
+APPROVED
+    │  PR merged to main
+    │  Status: approved
+    ▼
+PUBLICATION
+    │  [Future] Import script pushes to MediaWiki
+    │  Status: published
+    ▼
+MAINTENANCE
+    │  Ongoing monitoring for staleness / update triggers
+    │
+    ├──[update trigger]──► DRAFTING (update PR)
+    │
+    └──[archival trigger]──►
+ARCHIVED
+    │  Status: archived
+    │  Content preserved in Git history
+```
+
+---
+
+## 3. Versioning Model
+
+Articles use **semantic versioning** (`MAJOR.MINOR.PATCH`):
+
+| Change Type | Version Bump | Review Required |
+|---|---|---|
+| Typographical / formatting fix | PATCH (x.x.1) | No (Editor only) |
+| New references, minor factual additions | MINOR (x.1.0) | Peer review |
+| New sections, significant clinical updates | MINOR (x.1.0) | Peer review |
+| Complete rewrite, major guideline-driven revision | MAJOR (1.0.0 → 2.0.0) | Full review cycle |
+| Retraction of incorrect clinical information | MAJOR | Medical Advisor sign-off |
+
+Version history is tracked in Git commit history. The current version is always present in the `version` field of the article frontmatter.
+
+---
+
+## 4. Update Triggers
+
+An article may enter a new revision cycle for the following reasons:
+
+### 4.1 Guideline Update
+
+- A guideline referenced in the article has been updated or superseded.
+- Detected via: monthly guideline registry review (`scripts/reporting/monthly-guideline-report.py`).
+- Response time: 30 days (high priority) or next quarterly cycle (standard priority), per AMPIS score.
+
+### 4.2 PubMed Alert
+
+- A PubMed surveillance alert of `HIGH` or `MEDIUM` relevance has been generated for the article's topic.
+- Detected via: daily PubMed surveillance (`scripts/pubmed/pubmed-daily-search.py`).
+- Response time: 7 days (HIGH), 30 days (MEDIUM).
+
+### 4.3 Editorial Flag
+
+- An editor or reviewer identifies an inaccuracy, safety concern, or significant gap in published content.
+- Any Wikimedica contributor or reader (via the MediaWiki "report issue" function, future) can flag content for review.
+- An immediate review is triggered when a safety concern is raised.
+
+### 4.4 Stale Detection
+
+- Article has not been reviewed in 12 months.
+- Detected via: `scripts/review/generate-review-report.py` (monthly run).
+- Response: GitHub Issue opened; author notified with 30-day response window.
+
+### 4.5 External Report
+
+- Reader, patient, or third-party organisation reports an error.
+- All external reports are triaged by the Editorial Board within 5 business days.
+
+---
+
+## 5. Archival Policy
+
+An article is archived when:
+
+- It has been **superseded** by a more comprehensive or updated version.
+- The clinical topic is **no longer relevant** (withdrawn procedure, obsolete diagnosis).
+- The content was **retracted** due to clinical error or copyright violation.
+- The article has been **inactive for 24 months** with no update activity despite automated prompts.
+
+### Archival Process
+
+1. Editor changes `status` to `archived` in frontmatter.
+2. Article is moved to `content/archived/` (future: Git branching strategy).
+3. MediaWiki page is updated with an archival notice pointing to any replacement article.
+4. Git history is preserved; content is never deleted from the repository.
+
+---
+
+## 6. Content Scoring
+
+Every published article is assigned a **Content Quality Score (CQS)** — a composite indicator used to prioritise editorial review and identify articles needing improvement.
+
+### CQS Dimensions
+
+| Dimension | Weight | Description |
+|---|---|---|
+| Completeness | 25% | All required frontmatter fields and sections present |
+| Reference Quality | 25% | Proportion of claims backed by S3/S2 guidelines or RCTs |
+| Currency | 20% | Days since last review (normalised; penalises staleness) |
+| Review Depth | 15% | Number of distinct qualified reviewers |
+| Readability | 15% | Flesch-Kincaid or equivalent score (appropriate to article type) |
+
+CQS is calculated by `scripts/review/generate-review-report.py` and reported in the monthly review dashboard.
+
+---
+
+## 7. Quality Metrics
+
+The Editorial Board tracks the following platform-level quality metrics:
+
+| Metric | Target | Measurement Frequency |
+|---|---|---|
+| % articles with `published` status that are current (not stale) | ≥ 90% | Monthly |
+| Average review turnaround time (standard) | ≤ 14 days | Monthly |
+| % articles with ≥ 2 reviewers | ≥ 60% | Quarterly |
+| % high-risk articles with Medical Advisor sign-off | 100% | Monthly |
+| PubMed HIGH alerts actioned within 7 days | ≥ 80% | Monthly |
+| Guideline updates reflected within 30 days (high priority) | ≥ 90% | Monthly |
+| Author CoI declarations up to date | 100% | Annually |
+
+These metrics are reported in the annual editorial report and used to inform resource allocation and process improvements.

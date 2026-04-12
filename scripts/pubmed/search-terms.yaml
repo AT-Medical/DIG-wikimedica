@@ -1,0 +1,282 @@
+# =============================================================================
+# Wikimedica PubMed Search Terms
+# =============================================================================
+# Format: YAML map of specialties, each with a list of named queries.
+#
+# Each query has:
+#   name:    Short identifier for the query (used in logging and output tagging)
+#   query:   Full PubMed query string (uses standard PubMed syntax)
+#
+# Specialty entries also have:
+#   wikimedica_tags: list of Wikimedica canonical specialty names for tagging results
+#
+# All queries automatically receive a date filter applied by the pipeline script.
+# Human studies filter ("humans"[MeSH]) is recommended for clinical queries.
+# =============================================================================
+
+specialties:
+
+  # ---------------------------------------------------------------------------
+  # Innere Medizin (General Internal Medicine)
+  # ---------------------------------------------------------------------------
+  Innere Medizin:
+    wikimedica_tags:
+      - "Innere Medizin"
+    queries:
+      - name: "innere_medizin_general"
+        query: >
+          ("Internal Medicine"[MeSH] OR "internal medicine"[tw])
+          AND ("Clinical Trial"[pt] OR "Meta-Analysis"[pt] OR "Systematic Review"[pt] OR "Guideline"[pt])
+          AND "humans"[MeSH]
+
+  # ---------------------------------------------------------------------------
+  # Kardiologie (Cardiology)
+  # ---------------------------------------------------------------------------
+  Kardiologie:
+    wikimedica_tags:
+      - "Kardiologie"
+    queries:
+      - name: "kardiologie_core"
+        query: >
+          ("Cardiology"[MeSH] OR "Heart Failure"[MeSH] OR "Myocardial Infarction"[MeSH]
+          OR "Atrial Fibrillation"[MeSH] OR "Coronary Artery Disease"[MeSH]
+          OR "Hypertension"[MeSH] OR "Acute Coronary Syndrome"[MeSH])
+          AND ("Randomized Controlled Trial"[pt] OR "Meta-Analysis"[pt]
+          OR "Systematic Review"[pt] OR "Practice Guideline"[pt])
+          AND "humans"[MeSH]
+      - name: "kardiologie_pharmacotherapy"
+        query: >
+          ("beta-Adrenergic Blockers"[MeSH] OR "ACE Inhibitors"[MeSH]
+          OR "SGLT2 Inhibitors"[MeSH] OR "statins"[tw] OR "anticoagulants"[MeSH])
+          AND ("heart failure"[MeSH] OR "atrial fibrillation"[MeSH]
+          OR "myocardial infarction"[MeSH])
+          AND ("Clinical Trial"[pt] OR "Meta-Analysis"[pt])
+          AND "humans"[MeSH]
+
+  # ---------------------------------------------------------------------------
+  # Pneumologie (Pulmonology)
+  # ---------------------------------------------------------------------------
+  Pneumologie:
+    wikimedica_tags:
+      - "Pneumologie"
+    queries:
+      - name: "pneumologie_core"
+        query: >
+          ("Pulmonary Disease, Chronic Obstructive"[MeSH] OR "Asthma"[MeSH]
+          OR "Lung Neoplasms"[MeSH] OR "Pulmonary Embolism"[MeSH]
+          OR "Pneumonia"[MeSH] OR "Sleep Apnea Syndromes"[MeSH]
+          OR "Interstitial Lung Disease"[MeSH])
+          AND ("Randomized Controlled Trial"[pt] OR "Meta-Analysis"[pt]
+          OR "Systematic Review"[pt] OR "Practice Guideline"[pt])
+          AND "humans"[MeSH]
+
+  # ---------------------------------------------------------------------------
+  # Gastroenterologie (Gastroenterology)
+  # ---------------------------------------------------------------------------
+  Gastroenterologie:
+    wikimedica_tags:
+      - "Gastroenterologie"
+    queries:
+      - name: "gastro_core"
+        query: >
+          ("Inflammatory Bowel Diseases"[MeSH] OR "Crohn Disease"[MeSH]
+          OR "Colitis, Ulcerative"[MeSH] OR "Liver Cirrhosis"[MeSH]
+          OR "Gastrointestinal Hemorrhage"[MeSH] OR "Colorectal Neoplasms"[MeSH]
+          OR "Hepatitis"[MeSH] OR "Irritable Bowel Syndrome"[MeSH])
+          AND ("Randomized Controlled Trial"[pt] OR "Meta-Analysis"[pt]
+          OR "Systematic Review"[pt] OR "Practice Guideline"[pt])
+          AND "humans"[MeSH]
+
+  # ---------------------------------------------------------------------------
+  # Nephrologie (Nephrology)
+  # ---------------------------------------------------------------------------
+  Nephrologie:
+    wikimedica_tags:
+      - "Nephrologie"
+    queries:
+      - name: "nephrologie_core"
+        query: >
+          ("Kidney Diseases"[MeSH] OR "Renal Insufficiency, Chronic"[MeSH]
+          OR "Glomerulonephritis"[MeSH] OR "Kidney Transplantation"[MeSH]
+          OR "Diabetic Nephropathies"[MeSH] OR "Acute Kidney Injury"[MeSH])
+          AND ("Randomized Controlled Trial"[pt] OR "Meta-Analysis"[pt]
+          OR "Practice Guideline"[pt])
+          AND "humans"[MeSH]
+
+  # ---------------------------------------------------------------------------
+  # Endokrinologie/Diabetologie (Endocrinology / Diabetology)
+  # ---------------------------------------------------------------------------
+  Endokrinologie/Diabetologie:
+    wikimedica_tags:
+      - "Endokrinologie/Diabetologie"
+    queries:
+      - name: "diabetes_core"
+        query: >
+          ("Diabetes Mellitus, Type 2"[MeSH] OR "Diabetes Mellitus, Type 1"[MeSH]
+          OR "Thyroid Neoplasms"[MeSH] OR "Hypothyroidism"[MeSH]
+          OR "Osteoporosis"[MeSH] OR "Polycystic Ovary Syndrome"[MeSH]
+          OR "Adrenal Insufficiency"[MeSH])
+          AND ("Randomized Controlled Trial"[pt] OR "Meta-Analysis"[pt]
+          OR "Practice Guideline"[pt])
+          AND "humans"[MeSH]
+
+  # ---------------------------------------------------------------------------
+  # Hämatologie/Onkologie (Haematology / Oncology)
+  # ---------------------------------------------------------------------------
+  Hämatologie/Onkologie:
+    wikimedica_tags:
+      - "Hämatologie/Onkologie"
+    queries:
+      - name: "onkologie_core"
+        query: >
+          ("Breast Neoplasms"[MeSH] OR "Lung Neoplasms"[MeSH]
+          OR "Colorectal Neoplasms"[MeSH] OR "Leukemia"[MeSH]
+          OR "Lymphoma"[MeSH] OR "Anemia"[MeSH] OR "Thrombocytopenia"[MeSH]
+          OR "immunotherapy"[MeSH] OR "Antineoplastic Agents"[MeSH])
+          AND ("Randomized Controlled Trial"[pt] OR "Meta-Analysis"[pt]
+          OR "Practice Guideline"[pt])
+          AND "humans"[MeSH]
+
+  # ---------------------------------------------------------------------------
+  # Infektiologie (Infectious Diseases)
+  # ---------------------------------------------------------------------------
+  Infektiologie:
+    wikimedica_tags:
+      - "Infektiologie"
+    queries:
+      - name: "infektiologie_core"
+        query: >
+          ("Sepsis"[MeSH] OR "COVID-19"[MeSH] OR "HIV Infections"[MeSH]
+          OR "Antimicrobial Stewardship"[MeSH] OR "Anti-Bacterial Agents"[MeSH]
+          OR "Respiratory Tract Infections"[MeSH] OR "Urinary Tract Infections"[MeSH])
+          AND ("Randomized Controlled Trial"[pt] OR "Meta-Analysis"[pt]
+          OR "Practice Guideline"[pt] OR "Guideline"[pt])
+          AND "humans"[MeSH]
+
+  # ---------------------------------------------------------------------------
+  # Neurologie (Neurology)
+  # ---------------------------------------------------------------------------
+  Neurologie:
+    wikimedica_tags:
+      - "Neurologie"
+    queries:
+      - name: "neurologie_core"
+        query: >
+          ("Stroke"[MeSH] OR "Multiple Sclerosis"[MeSH] OR "Epilepsy"[MeSH]
+          OR "Parkinson Disease"[MeSH] OR "Migraine Disorders"[MeSH]
+          OR "Dementia"[MeSH] OR "Alzheimer Disease"[MeSH])
+          AND ("Randomized Controlled Trial"[pt] OR "Meta-Analysis"[pt]
+          OR "Practice Guideline"[pt])
+          AND "humans"[MeSH]
+
+  # ---------------------------------------------------------------------------
+  # Psychiatrie (Psychiatry)
+  # ---------------------------------------------------------------------------
+  Psychiatrie:
+    wikimedica_tags:
+      - "Psychiatrie"
+    queries:
+      - name: "psychiatrie_core"
+        query: >
+          ("Depressive Disorder"[MeSH] OR "Schizophrenia"[MeSH]
+          OR "Anxiety Disorders"[MeSH] OR "Bipolar Disorder"[MeSH]
+          OR "Suicide"[MeSH] OR "Substance-Related Disorders"[MeSH])
+          AND ("Randomized Controlled Trial"[pt] OR "Meta-Analysis"[pt]
+          OR "Practice Guideline"[pt])
+          AND "humans"[MeSH]
+
+  # ---------------------------------------------------------------------------
+  # Notfallmedizin (Emergency Medicine)
+  # ---------------------------------------------------------------------------
+  Notfallmedizin:
+    wikimedica_tags:
+      - "Notfallmedizin"
+    queries:
+      - name: "notfall_core"
+        query: >
+          ("Emergency Medicine"[MeSH] OR "Cardiopulmonary Resuscitation"[MeSH]
+          OR "Anaphylaxis"[MeSH] OR "Trauma, Multiple"[MeSH]
+          OR "Emergency Service, Hospital"[MeSH])
+          AND ("Randomized Controlled Trial"[pt] OR "Meta-Analysis"[pt]
+          OR "Guideline"[pt])
+          AND "humans"[MeSH]
+
+  # ---------------------------------------------------------------------------
+  # Palliativmedizin (Palliative Medicine)
+  # ---------------------------------------------------------------------------
+  Palliativmedizin:
+    wikimedica_tags:
+      - "Palliativmedizin"
+    queries:
+      - name: "palliativ_core"
+        query: >
+          ("Palliative Care"[MeSH] OR "Terminal Care"[MeSH]
+          OR "Advance Care Planning"[MeSH] OR "Hospice Care"[MeSH]
+          OR "Pain Management"[MeSH])
+          AND ("Randomized Controlled Trial"[pt] OR "Meta-Analysis"[pt]
+          OR "Systematic Review"[pt] OR "Guideline"[pt])
+          AND "humans"[MeSH]
+
+  # ===========================================================================
+  # Gender-Medizin (Gender Medicine) — FLAGSHIP FOCUS AREA
+  # Extended search strategy with broader term set and daily expanded review
+  # ===========================================================================
+  Gender-Medizin:
+    wikimedica_tags:
+      - "Gender-Medizin"
+    flagship: true          # Triggers expanded review pipeline
+    queries:
+      - name: "gender_medizin_core"
+        query: >
+          ("Sex Factors"[MeSH] OR "Gender and Health"[MeSH]
+          OR "Women's Health"[MeSH] OR "Sex Characteristics"[MeSH]
+          OR "Gender Identity"[MeSH] OR "Sex Differences"[tw]
+          OR "Gender Differences"[tw] OR "Gender-based medicine"[tw]
+          OR "Geschlechtermedizin"[tw] OR "geschlechtsspezifisch"[tw])
+          AND "humans"[MeSH]
+
+      - name: "gender_cardiology"
+        query: >
+          ("myocardial infarction"[MeSH] OR "acute coronary syndrome"[MeSH]
+          OR "heart failure"[MeSH] OR "atrial fibrillation"[MeSH])
+          AND ("sex factors"[MeSH] OR "women"[MeSH] OR "sex differences"[tw]
+          OR "female"[MeSH])
+          AND "humans"[MeSH]
+
+      - name: "gender_pharmacology"
+        query: >
+          ("pharmacokinetics"[MeSH] OR "drug metabolism"[MeSH]
+          OR "adverse drug reactions"[MeSH] OR "drug dosage"[MeSH])
+          AND ("sex factors"[MeSH] OR "sex differences"[tw] OR "women"[MeSH])
+          AND ("Clinical Trial"[pt] OR "Meta-Analysis"[pt] OR "Systematic Review"[pt])
+          AND "humans"[MeSH]
+
+      - name: "gender_pain"
+        query: >
+          ("pain"[MeSH] OR "chronic pain"[MeSH] OR "fibromyalgia"[MeSH]
+          OR "Endometriosis"[MeSH])
+          AND ("sex factors"[MeSH] OR "sex differences"[tw]
+          OR "gender differences"[tw])
+          AND "humans"[MeSH]
+
+      - name: "gender_autoimmune"
+        query: >
+          ("autoimmune diseases"[MeSH] OR "lupus erythematosus"[MeSH]
+          OR "multiple sclerosis"[MeSH] OR "hashimoto disease"[MeSH]
+          OR "rheumatoid arthritis"[MeSH])
+          AND ("sex factors"[MeSH] OR "women"[MeSH])
+          AND "humans"[MeSH]
+
+      - name: "gender_clinical_trials"
+        query: >
+          ("clinical trials as topic"[MeSH] OR "clinical trial"[pt])
+          AND ("sex factors"[MeSH] OR "women"[MeSH] OR "sex disaggregated"[tw]
+          OR "sex-disaggregated"[tw] OR "gender reporting"[tw])
+          AND "humans"[MeSH]
+
+      - name: "transgender_health"
+        query: >
+          ("Transgender Persons"[MeSH] OR "Gender Dysphoria"[MeSH]
+          OR "Gender-Affirming Care"[tw] OR "non-binary"[tw]
+          OR "gender nonconforming"[tw])
+          AND "humans"[MeSH]

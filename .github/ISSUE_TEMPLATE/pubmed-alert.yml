@@ -1,0 +1,110 @@
+name: PubMed Surveillance Alert
+description: Automated alert from the PubMed daily surveillance pipeline
+title: "[PubMed Alert] "
+labels:
+  - pubmed-alert
+  - triage
+
+body:
+  - type: input
+    id: pmid
+    attributes:
+      label: PubMed ID (PMID)
+      placeholder: "38000001"
+    validations:
+      required: true
+
+  - type: input
+    id: pubmed-url
+    attributes:
+      label: PubMed URL
+      placeholder: "https://pubmed.ncbi.nlm.nih.gov/38000001/"
+    validations:
+      required: true
+
+  - type: input
+    id: article-title
+    attributes:
+      label: Article Title
+    validations:
+      required: true
+
+  - type: input
+    id: journal
+    attributes:
+      label: Journal
+      placeholder: "Eur Heart J (2024)"
+    validations:
+      required: false
+
+  - type: textarea
+    id: abstract-excerpt
+    attributes:
+      label: Abstract Excerpt
+      description: First 300–400 characters of the abstract
+    validations:
+      required: false
+
+  - type: dropdown
+    id: specialty
+    attributes:
+      label: Wikimedica Specialty Tag(s)
+      multiple: true
+      options:
+        - Innere Medizin
+        - Kardiologie
+        - Pneumologie
+        - Gastroenterologie
+        - Nephrologie
+        - Endokrinologie/Diabetologie
+        - Hämatologie/Onkologie
+        - Infektiologie
+        - Rheumatologie
+        - Neurologie
+        - Psychiatrie
+        - Dermatologie
+        - Pädiatrie
+        - Gynäkologie/Geburtshilfe
+        - Urologie
+        - Orthopädie/Unfallchirurgie
+        - Anästhesiologie
+        - Intensivmedizin
+        - Notfallmedizin
+        - Chirurgie
+        - Radiologie
+        - Labormedizin
+        - Pharmakologie
+        - Palliativmedizin
+        - Prävention/Public Health
+        - Gender-Medizin
+    validations:
+      required: true
+
+  - type: input
+    id: relevance-score
+    attributes:
+      label: Relevance Score
+      placeholder: "82 (HIGH)"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: suggested-action
+    attributes:
+      label: Suggested Editorial Action
+      options:
+        - Update existing article
+        - Create new article
+        - Add as supporting reference to existing article
+        - Review and decide
+        - No action required
+    validations:
+      required: true
+
+  - type: input
+    id: related-article
+    attributes:
+      label: Related Wikimedica Article (if applicable)
+      placeholder: "content/specialties/kardiologie/herzinsuffizienz.md"
+    validations:
+      required: false

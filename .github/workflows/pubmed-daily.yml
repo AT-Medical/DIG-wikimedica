@@ -1,0 +1,73 @@
+name: PubMed Daily Surveillance
+
+on:
+  schedule:
+    - cron: "0 6 * * *"  # Daily at 06:00 UTC
+  workflow_dispatch:
+    inputs:
+      days_back:
+        description: "Number of days back to search"
+        required: false
+        default: "2"
+      dry_run:
+        description: "Dry run (do not create issues or commit)"
+        required: false
+        default: "false"
+        type: boolean
+
+jobs:
+  pubmed-search:
+    name: Run PubMed daily surveillance
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dependencies
+        run: pip install biopython pyyaml requests
+
+      - name: Run PubMed daily search
+        env:
+          NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPO: ${{ github.repository }}
+          DAYS_BACK: ${{ github.event.inputs.days_back || '2' }}
+        run: |
+          DRY_RUN_FLAG=""
+          if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
+            DRY_RUN_FLAG="--dry-run"
+          fi
+          python scripts/pubmed/pubmed-daily-search.py ${DRY_RUN_FLAG}
+
+      - name: Commit PubMed output files
+        if: github.event.inputs.dry_run != 'true'
+        run: |
+          git config user.name "Wikimedica Bot"
+          git config user.email "bot@wikimedica.de"
+          git add data/pubmed/
+          if git diff --staged --quiet; then
+            echo "No new PubMed data to commit."
+          else
+            DATE=$(date -u '+%Y-%m-%d')
+            git commit -m "chore(pubmed): daily surveillance results ${DATE} [skip ci]"
+            git push
+          fi
+
+      - name: Upload error log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pubmed-error-log
+          path: data/pubmed/error.log
+          if-no-files-found: ignore

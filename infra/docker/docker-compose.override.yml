@@ -1,0 +1,70 @@
+version: "3.9"
+
+# =============================================================================
+# Wikimedica — Local Development Override
+# =============================================================================
+# Overrides production settings for local development.
+# Usage:
+#   docker compose -f infra/docker/docker-compose.yml \
+#                  -f infra/docker/docker-compose.override.yml up -d
+#
+# This file:
+#   - Exposes ports directly (bypasses Traefik for easier local access)
+#   - Disables TLS (no cert required locally)
+#   - Mounts local volume for MediaWiki images
+#   - Exposes MariaDB port for local SQL client access
+#   - Sets debug-level logging
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # Traefik — disabled in local dev (direct port access used instead)
+  # ---------------------------------------------------------------------------
+  traefik:
+    # In local dev, we access MediaWiki directly on port 8080
+    # Traefik is still started but not used for routing
+    command:
+      - "--api.insecure=true"        # Enable Traefik dashboard on port 8081
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--log.level=DEBUG"
+    ports:
+      - "80:80"
+      - "8081:8080"                  # Traefik dashboard (local only)
+    # No Cloudflare DNS challenge in local dev
+    environment:
+      - TRAEFIK_LOG_LEVEL=DEBUG
+
+  # ---------------------------------------------------------------------------
+  # MediaWiki — local dev settings
+  # ---------------------------------------------------------------------------
+  mediawiki:
+    ports:
+      - "8080:80"                    # Access MediaWiki at http://localhost:8080
+    volumes:
+      - ./mediawiki_dev_images:/var/www/html/images    # Local images directory
+      - ../mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php:ro
+    labels:
+      # Simplified routing for local dev — HTTP only, no TLS
+      - "traefik.enable=true"
+      - "traefik.http.routers.mediawiki-dev.rule=Host(`localhost`)"
+      - "traefik.http.routers.mediawiki-dev.entrypoints=web"
+      - "traefik.http.services.mediawiki-dev.loadbalancer.server.port=80"
+    environment:
+      # Override DB host to match dev setup
+      - MEDIAWIKI_DB_HOST=mariadb
+      - MW_SITE_SERVER=http://localhost:8080
+
+  # ---------------------------------------------------------------------------
+  # MariaDB — expose port for local SQL client access
+  # ---------------------------------------------------------------------------
+  mariadb:
+    ports:
+      - "3306:3306"                  # Access MariaDB at localhost:3306 for dev tools
+    environment:
+      # Use simple credentials for local dev only
+      MYSQL_ROOT_PASSWORD: devroot
+      MYSQL_DATABASE: wikimedica_dev
+      MYSQL_USER: wikimedica
+      MYSQL_PASSWORD: wikimedica_dev_password

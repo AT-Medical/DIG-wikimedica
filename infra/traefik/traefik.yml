@@ -49,7 +49,12 @@ entryPoints:
 certificatesResolvers:
   cloudflare-dns:
     acme:
-      email: "${TRAEFIK_ACME_EMAIL}"
+      # IMPORTANT: Traefik static YAML does not support ${VAR} expansion.
+      # Set the ACME email via CLI flag or Docker command override:
+      #   --certificatesresolvers.cloudflare-dns.acme.email=admin@wikimedica.de
+      # Alternatively, use the Traefik env var TRAEFIK_CERTIFICATESRESOLVERS_CLOUDFLARE-DNS_ACME_EMAIL
+      # Do NOT place a literal email address here — override per environment.
+      email: ""
       storage: /certs/acme.json
       caServer: "https://acme-v02.api.letsencrypt.org/directory"
       dnsChallenge:

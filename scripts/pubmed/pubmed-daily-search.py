@@ -18,7 +18,8 @@ Environment variables (optional):
     NCBI_EMAIL           — Email registered with NCBI (default: surveillance@wikimedica.de)
     SEARCH_TERMS_FILE    — Path to search-terms.yaml (default: scripts/pubmed/search-terms.yaml)
     OUTPUT_DIR           — Output directory for JSONL (default: data/pubmed)
-    DAYS_BACK            — How many days back to search (default: 2, 3 on Mondays)
+    DAYS_BACK            — How many days back to search (default: 2)
+    MONDAY_DAYS_BACK     — Days back on Mondays to cover weekend (default: 3)
     LOG_LEVEL            — Logging level (default: INFO)
 """
 
@@ -566,8 +567,12 @@ if __name__ == "__main__":
 
     # On Mondays, extend search window to cover the weekend
     days = args.days_back
-    if date.today().weekday() == 0 and days < 3:  # Monday
-        days = 3
-        logger.info("Monday detected — extending search window to 3 days to cover weekend")
+    monday_days_back = int(os.environ.get("MONDAY_DAYS_BACK", "3"))
+    if date.today().weekday() == 0 and days < monday_days_back:  # Monday
+        days = monday_days_back
+        logger.info(
+            "Monday detected — extending search window to %d days to cover weekend",
+            monday_days_back,
+        )
 
     run_pipeline(run_date=args.date, days_back=days, dry_run=args.dry_run)

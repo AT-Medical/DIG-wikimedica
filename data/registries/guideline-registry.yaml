@@ -50,7 +50,7 @@ guidelines:
     year: 2021
     version: "2.0"
     url: "https://www.awmf.org/leitlinien/detail/ll/nvl-003.html"
-    next_review: "2025-06-01"
+    next_review: "2026-06-01"
     priority: high
     status: current
     wikimedica_articles: []
@@ -74,7 +74,7 @@ guidelines:
     year: 2022
     version: "3.1"
     url: "https://www.awmf.org/leitlinien/detail/ll/nvl-005.html"
-    next_review: "2025-12-01"
+    next_review: "2026-12-01"
     priority: high
     status: current
     wikimedica_articles: []
@@ -98,7 +98,7 @@ guidelines:
     year: 2020
     version: "1.0"
     url: "https://www.awmf.org/leitlinien/detail/ll/079-001.html"
-    next_review: "2025-01-01"
+    next_review: "2026-07-01"
     priority: high
     status: under-revision
     wikimedica_articles: []
@@ -110,7 +110,7 @@ guidelines:
     year: 2021
     version: "4.4"
     url: "https://www.awmf.org/leitlinien/detail/ll/032-045.html"
-    next_review: "2025-04-01"
+    next_review: "2026-04-01"
     priority: high
     status: current
     wikimedica_articles: []
@@ -122,7 +122,7 @@ guidelines:
     year: 2022
     version: "1.0"
     url: "https://www.awmf.org/leitlinien/detail/ll/nvl-008.html"
-    next_review: "2025-09-01"
+    next_review: "2026-09-01"
     priority: high
     status: current
     wikimedica_articles: []

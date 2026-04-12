@@ -20,6 +20,9 @@ services:
       - ../env/.env
     command:
       - "--configFile=/etc/traefik/traefik.yml"
+      # Pass ACME email via CLI flag because Traefik static YAML does not expand ${VAR}.
+      # TRAEFIK_ACME_EMAIL must be set in ../env/.env
+      - "--certificatesresolvers.cloudflare-dns.acme.email=${TRAEFIK_ACME_EMAIL}"
     ports:
       - "80:80"
       - "443:443"

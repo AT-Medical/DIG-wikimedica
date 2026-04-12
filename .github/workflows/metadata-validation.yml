@@ -8,6 +8,9 @@ on:
     paths:
       - "content/**/*.md"
 
+permissions:
+  contents: read
+
 jobs:
   validate-metadata:
     name: Validate article frontmatter

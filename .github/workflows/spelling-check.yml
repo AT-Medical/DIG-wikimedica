@@ -10,6 +10,9 @@ on:
       - "**/*.md"
       - ".cspell.json"
 
+permissions:
+  contents: read
+
 jobs:
   spelling:
     name: Check spelling in Markdown files

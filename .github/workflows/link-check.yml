@@ -8,6 +8,9 @@ on:
       - "**/*.md"
   workflow_dispatch:  # Allow manual trigger
 
+permissions:
+  contents: read
+
 jobs:
   link-check:
     name: Check links in Markdown files

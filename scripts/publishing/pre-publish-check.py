@@ -45,7 +45,7 @@ from datetime import date
 # ---------------------------------------------------------------------------
 
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.DOTALL)
-TODO_RE = re.compile(r"\bTODO\b|\bFIXME\b|\bXXX\b|<!--.*?-->", re.IGNORECASE)
+TODO_RE = re.compile(r"\bTODO\b|\bFIXME\b|\bXXX\b|<!--.*?-->", re.IGNORECASE | re.DOTALL)
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 
 # Required sections by article type (lowercase)

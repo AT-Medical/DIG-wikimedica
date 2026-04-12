@@ -1,3 +1,49 @@
+# Parse deployment arguments. Support both:
+#   ./deploy.sh --tag vX.Y.Z
+# and the legacy positional form:
+#   ./deploy.sh vX.Y.Z
+usage() {
+  echo "Usage: $0 [--tag <ref>] [<ref>]" >&2
+}
+
+DEPLOY_TAG=""
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --tag)
+      if [ "$#" -lt 2 ] || [ -z "$2" ]; then
+        echo "Error: --tag requires a git ref." >&2
+        usage
+        exit 1
+      fi
+      if [ -n "$DEPLOY_TAG" ]; then
+        echo "Error: deployment ref specified more than once." >&2
+        usage
+        exit 1
+      fi
+      DEPLOY_TAG="$2"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    -*)
+      echo "Error: unknown option: $1" >&2
+      usage
+      exit 1
+      ;;
+    *)
+      if [ -n "$DEPLOY_TAG" ]; then
+        echo "Error: deployment ref specified more than once." >&2
+        usage
+        exit 1
+      fi
+      DEPLOY_TAG="$1"
+      shift
+      ;;
+  esac
+done
 #!/usr/bin/env bash
 # =============================================================================
 # deploy.sh — Wikimedica Production Deploy Script

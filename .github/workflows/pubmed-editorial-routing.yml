@@ -1,0 +1,142 @@
+name: PubMed Editorial Routing
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+  pull-requests: read
+  issues: write
+
+jobs:
+  route-pubmed-content:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Route PubMed editorial decision
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HUBSPOT_PRIVATE_APP_TOKEN: ${{ secrets.HUBSPOT_PRIVATE_APP_TOKEN }}
+          WHATSAPP_WEBHOOK_URL: ${{ secrets.WHATSAPP_WEBHOOK_URL }}
+        run: |
+          set -euo pipefail
+
+          echo "Processing PR #${PR_NUMBER}: ${PR_TITLE}"
+
+          DECISION=""
+          if echo "$PR_BODY" | grep -qiE '^- \[[xX]\] Newsletter'; then
+            DECISION="newsletter"
+          fi
+          if echo "$PR_BODY" | grep -qiE '^- \[[xX]\] WhatsApp Kanal'; then
+            if [ -n "$DECISION" ]; then
+              DECISION="multiple"
+            else
+              DECISION="whatsapp"
+            fi
+          fi
+          if echo "$PR_BODY" | grep -qiE '^- \[[xX]\] Nur Archiv'; then
+            if [ -n "$DECISION" ]; then
+              DECISION="multiple"
+            else
+              DECISION="archive"
+            fi
+          fi
+          if echo "$PR_BODY" | grep -qiE '^- \[[xX]\] Wiedervorlage'; then
+            if [ -n "$DECISION" ]; then
+              DECISION="multiple"
+            else
+              DECISION="review_later"
+            fi
+          fi
+
+          if [ -z "$DECISION" ]; then
+            gh pr comment "$PR_NUMBER" --body "⚠️ Keine redaktionelle Entscheidung gefunden. Bitte im PR-Template genau eine Option auswählen: Newsletter, WhatsApp Kanal, Nur Archiv oder Wiedervorlage."
+            exit 1
+          fi
+
+          if [ "$DECISION" = "multiple" ]; then
+            gh pr comment "$PR_NUMBER" --body "⚠️ Mehrere redaktionelle Entscheidungen ausgewählt. Bitte künftig genau eine Hauptentscheidung auswählen. Dieser PR wurde nicht automatisch verarbeitet."
+            exit 1
+          fi
+
+          echo "Decision: $DECISION"
+
+          mkdir -p data/pubmed/archive data/pubmed/newsletter data/pubmed/whatsapp data/pubmed/review_later
+
+          # Move PubMed records from inbox/review areas into the selected processing folder.
+          # The final WikiMedica archive remains under data/pubmed/archive/<specialty>/ when metadata provides a specialty.
+          changed_files=$(git diff --name-only HEAD^ HEAD | grep -E '^data/pubmed/(inbox|review|reviewed|newsletter|whatsapp|review_later)/.*\.(json|jsonl|md|yml|yaml)$' || true)
+
+          if [ -z "$changed_files" ]; then
+            gh pr comment "$PR_NUMBER" --body "ℹ️ Keine routbaren PubMed-Dateien in diesem PR gefunden. Entscheidung: ${DECISION}."
+            exit 0
+          fi
+
+          echo "$changed_files" | while read -r file; do
+            [ -z "$file" ] && continue
+            base=$(basename "$file")
+
+            specialty="misc"
+            if grep -qiE 'specialty:|fachbereich:' "$file" 2>/dev/null; then
+              specialty=$(grep -iE 'specialty:|fachbereich:' "$file" | head -n1 | sed -E 's/.*:[[:space:]]*//; s/["'\'' ]//g; s/[^A-Za-z0-9._-]/-/g' | tr '[:upper:]' '[:lower:]')
+              [ -z "$specialty" ] && specialty="misc"
+            fi
+
+            case "$DECISION" in
+              newsletter)
+                mkdir -p "data/pubmed/newsletter/$specialty" "data/pubmed/archive/$specialty"
+                cp "$file" "data/pubmed/newsletter/$specialty/$base"
+                git mv "$file" "data/pubmed/archive/$specialty/$base" || mv "$file" "data/pubmed/archive/$specialty/$base"
+                ;;
+              whatsapp)
+                mkdir -p "data/pubmed/whatsapp/$specialty" "data/pubmed/archive/$specialty"
+                cp "$file" "data/pubmed/whatsapp/$specialty/$base"
+                git mv "$file" "data/pubmed/archive/$specialty/$base" || mv "$file" "data/pubmed/archive/$specialty/$base"
+                ;;
+              archive)
+                mkdir -p "data/pubmed/archive/$specialty"
+                git mv "$file" "data/pubmed/archive/$specialty/$base" || mv "$file" "data/pubmed/archive/$specialty/$base"
+                ;;
+              review_later)
+                mkdir -p "data/pubmed/review_later/$specialty"
+                git mv "$file" "data/pubmed/review_later/$specialty/$base" || mv "$file" "data/pubmed/review_later/$specialty/$base"
+                ;;
+            esac
+          done
+
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/pubmed
+            git commit -m "Route PubMed editorial decision from PR #${PR_NUMBER}"
+            git push
+          fi
+
+          case "$DECISION" in
+            newsletter)
+              if [ -n "${HUBSPOT_PRIVATE_APP_TOKEN:-}" ]; then
+                echo "HubSpot token present. Integration hook placeholder active."
+              else
+                echo "HubSpot token missing. Newsletter staging files created only."
+              fi
+              ;;
+            whatsapp)
+              if [ -n "${WHATSAPP_WEBHOOK_URL:-}" ]; then
+                echo "WhatsApp webhook present. Integration hook placeholder active."
+              else
+                echo "WhatsApp webhook missing. WhatsApp staging files created only."
+              fi
+              ;;
+          esac
+
+          gh pr comment "$PR_NUMBER" --body "✅ PubMed Editorial Routing abgeschlossen. Entscheidung: **${DECISION}**. Dateien wurden entsprechend verarbeitet und archiviert bzw. zur Wiedervorlage verschoben."

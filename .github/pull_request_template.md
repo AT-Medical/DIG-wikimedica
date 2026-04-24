@@ -2,7 +2,8 @@
 
 ## Verwendung
 
-Bitte genau eine Hauptentscheidung auswählen:
+Mehrfachauswahl ist möglich für Veröffentlichungswege.  
+„Nur Archiv“ und „Wiedervorlage“ sind exklusive Entscheidungen und dürfen nicht gemeinsam mit Newsletter oder WhatsApp gewählt werden.
 
 - [ ] Newsletter
 - [ ] WhatsApp Kanal
